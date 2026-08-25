@@ -18,6 +18,12 @@ test('uses mobile layouts as the responsive baseline for every section', () => {
   assert.match(documentSource, /viewport-fit=cover/)
 })
 
+test('uses the gyro photo behind a high-contrast hero treatment', () => {
+  assert.match(appSource, /backgroundImage: "url\('\/gyro-hero\.webp'\)"/)
+  assert.match(appSource, /bg-gradient-to-r from-\[#102d28\]\/85 via-\[#102d28\]\/58 to-\[#102d28\]\/20/)
+  assert.match(appSource, /text-\[#fff8ed\]/)
+})
+
 test('catalog cards expose separate detail and directions actions', () => {
   assert.match(appSource, /href={`\/places\/\$\{item\.id\}`}/)
   assert.match(appSource, /href={`\/restaurants\/\$\{item\.id\}`}/)

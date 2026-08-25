@@ -3,6 +3,7 @@ import places from './data/places.json'
 import venues from './data/restaurants.json'
 import itinerary from './data/itinerary.json'
 import sources from './data/sources.json'
+import touristDetails from './data/touristDetails.json'
 import { filterByLocation, LOCATION_FILTERS } from './locationFilter.js'
 import { getDirectionsUrl, getItemDestination } from './maps.js'
 import { buildPlaceDetails } from './placeDetails.js'
@@ -70,16 +71,17 @@ function App({ route = { name: 'guide' } }) {
 
   return (
     <div className="app-shell min-h-screen bg-[#f6f4ee] text-[#173d36]">
-      {activeTab !== 'itinerary' && <header className="relative overflow-hidden border-b border-[#173d36]/10 bg-[#f2eee5]">
-        <div className="absolute -right-24 -top-40 h-96 w-96 rounded-full bg-[#e6b66a]/20 blur-3xl" />
+      {activeTab !== 'itinerary' && <header className="relative isolate overflow-hidden border-b border-[#102d28] bg-[#102d28] text-[#fff8ed]">
+        <div aria-hidden="true" className="absolute inset-0 bg-cover bg-[position:50%_42%] sm:bg-[position:50%_48%] lg:bg-[position:50%_44%]" style={{ backgroundImage: "url('/gyro-hero.webp')" }} />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#102d28]/85 via-[#102d28]/58 to-[#102d28]/20" />
         <div className="relative mx-auto max-w-7xl px-5 pb-7 pt-7 sm:px-8 lg:px-12 lg:pb-10 lg:pt-10">
           <div className="mb-10 flex items-center justify-between lg:mb-16">
-            <a href="#main-content" className="flex items-center gap-3 font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b76243]"><span className="grid h-10 w-10 place-items-center rounded-full bg-[#173d36] text-[#f8f2e7]"><Icon name="map" size={20} /></span><span>Crete, slowly</span></a>
-            <div className="hidden items-center gap-2 rounded-full border border-[#173d36]/15 bg-white/50 px-4 py-2 text-sm font-medium sm:flex"><Icon name="sun" size={16} className="text-[#b76243]" /> Curated island guide</div>
+            <a href="#main-content" className="flex items-center gap-3 font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f3b47b]"><span className="grid h-10 w-10 place-items-center rounded-full border border-[#fff8ed]/35 bg-[#fff8ed]/12 text-[#fff8ed] backdrop-blur-sm"><Icon name="map" size={20} /></span><span>Crete, slowly</span></a>
+            <div className="hidden items-center gap-2 rounded-full border border-[#fff8ed]/25 bg-[#102d28]/35 px-4 py-2 text-sm font-medium text-[#fff8ed] backdrop-blur-sm sm:flex"><Icon name="sun" size={16} className="text-[#f3b47b]" /> Curated island guide</div>
           </div>
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#b76243]">Save less. Experience more.</p>
-          <h1 className="max-w-3xl font-serif text-5xl leading-[0.95] tracking-[-0.04em] text-[#173d36] sm:text-6xl lg:text-7xl">Your considered guide to Crete</h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-[#47635d] sm:text-lg">Discover island favourites, then see them come together in one calm, readable itinerary.</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#f3b47b]">Save less. Experience more.</p>
+          <h1 className="max-w-3xl font-serif text-5xl leading-[0.95] tracking-[-0.04em] text-[#fff8ed] [text-shadow:0_2px_8px_rgba(8,23,20,0.72)] sm:text-6xl lg:text-7xl">Your considered guide to Crete</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#f2eadf] [text-shadow:0_1px_5px_rgba(8,23,20,0.85)] sm:text-lg">Discover island favourites, then see them come together in one calm, readable itinerary.</p>
         </div>
       </header>}
 
@@ -126,6 +128,23 @@ function CardActions({ item, detailHref }) {
     <a href={detailHref} aria-label={`View details for ${item.name}`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#173d36]/20 px-4 text-sm font-bold text-[#173d36] no-underline transition hover:border-[#173d36]/45 hover:bg-[#f2eee5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243]">View details</a>
     <DirectionsLink item={item} className="bg-[#173d36] px-4 text-sm text-[#fffdf8]" />
   </div>
+}
+
+function getSourceLabel(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '')
+    const labels = {
+      'incrediblecrete.gr': 'Incredible Crete · official tourism',
+      'visitgreece.gr': 'Visit Greece · official tourism',
+      'unesco.org': 'UNESCO',
+      'whc.unesco.org': 'UNESCO World Heritage Centre',
+      'tripadvisor.com': 'Tripadvisor traveller information',
+      'facebook.com': 'Official social page',
+    }
+    return labels[host] ?? host
+  } catch {
+    return 'Visitor information'
+  }
 }
 
 function Places({ items, location, onLocationChange }) {
@@ -175,7 +194,7 @@ function DetailPage({ item, kind }) {
     return <div className="detail-shell min-h-screen bg-[#f6f4ee] px-5 py-8 text-[#173d36]"><main id="main-content" className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-start justify-center"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b76243]">Not found</p><h1 className="mt-3 font-serif text-5xl tracking-[-0.04em]">This stop isn’t in the guide.</h1><p className="mt-5 leading-7 text-[#63736f]">The link may be outdated, but the rest of the island guide is ready for you.</p><a href="/" className="mt-8 inline-flex min-h-12 items-center rounded-full bg-[#173d36] px-6 font-bold text-[#fffdf8] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b76243]">Return to the guide</a></main></div>
   }
 
-  const details = buildPlaceDetails(item, kind)
+  const details = buildPlaceDetails(item, kind, touristDetails[item.id])
   const sourceLinks = sources[`${kind === 'place' ? 'places' : 'restaurants'}`]?.[item.id] ?? []
   const isPlace = kind === 'place'
 
@@ -196,9 +215,9 @@ function DetailPage({ item, kind }) {
         <div className="detail-grid mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-16">
           <div className="space-y-12">
             <section aria-labelledby="why-visit"><p className="detail-number">01</p><h2 id="why-visit" className="mt-2 font-serif text-3xl">Why it’s worth your time</h2><p className="mt-4 text-base leading-7 text-[#526963]">{details.whyVisit}</p>{Array.isArray(item.goodFor) && <div className="mt-5 flex flex-wrap gap-2">{item.goodFor.map((tag) => <span key={tag} className="rounded-full bg-[#e9e1d3] px-3 py-1.5 text-xs font-bold text-[#526963]">{tag}</span>)}</div>}</section>
-            <section aria-labelledby="before-you-go"><p className="detail-number">02</p><h2 id="before-you-go" className="mt-2 font-serif text-3xl">Before you go</h2><p className="mt-4 text-base leading-7 text-[#526963]">{details.practical}</p><p className="mt-4 rounded-2xl bg-[#efe0bd]/65 p-4 text-sm leading-6 text-[#69482f]"><strong>Island reality:</strong> opening hours, access and weather can change seasonally. Recheck on the day, especially before a long drive.</p></section>
+            <section aria-labelledby="before-you-go"><p className="detail-number">02</p><h2 id="before-you-go" className="mt-2 font-serif text-3xl">Plan your visit</h2><div className="mt-5 grid gap-4 sm:grid-cols-2"><div className="rounded-2xl bg-[#e9e1d3]/70 p-5"><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#b76243]">Best time</p><p className="mt-2 text-sm leading-6 text-[#526963]">{details.bestTime}</p></div><div className="rounded-2xl bg-[#e9e1d3]/70 p-5"><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#b76243]">Getting there</p><p className="mt-2 text-sm leading-6 text-[#526963]">{details.access}</p></div></div>{details.tips.length > 0 && <div className="mt-6"><h3 className="font-serif text-2xl">Useful to know</h3><ul className="mt-3 space-y-3">{details.tips.map((tip) => <li key={tip} className="flex gap-3 text-base leading-7 text-[#526963]"><span aria-hidden="true" className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-[#b76243]" />{tip}</li>)}</ul></div>}<p className="mt-6 rounded-2xl bg-[#efe0bd]/65 p-4 text-sm leading-6 text-[#69482f]"><strong>Island reality:</strong> {details.practical} Recheck current opening, access and weather conditions on the day.</p></section>
             <section aria-labelledby="traveler-snapshot"><p className="detail-number">03</p><h2 id="traveler-snapshot" className="mt-2 font-serif text-3xl">Traveler snapshot</h2>{details.ratingLabel ? <div className="mt-5 flex items-start gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#173d36] text-[#f6d789]"><Icon name="star" size={20} /></span><div><p className="font-serif text-2xl">{details.ratingLabel}</p><p className="mt-1 text-xs text-[#788783]">{details.ratingCheckedAt}. Ratings can change; open Google Maps for current reviews.</p></div></div> : <p className="mt-4 text-base leading-7 text-[#526963]">This guide avoids copying anonymous review snippets. Use the practical notes above for planning, then open Google Maps to read the latest first-hand visitor experiences.</p>}</section>
-            {sourceLinks.length > 0 && <section aria-labelledby="research"><p className="detail-number">04</p><h2 id="research" className="mt-2 font-serif text-3xl">Research & current information</h2><p className="mt-3 text-sm leading-6 text-[#63736f]">Use these sources to confirm details close to your visit.</p><ul className="mt-4 space-y-2">{sourceLinks.map((url, index) => <li key={url}><a href={url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 font-bold text-[#173d36] underline decoration-[#b76243]/45 underline-offset-4">Visitor source {index + 1} <Icon name="arrow" size={15} /></a></li>)}</ul></section>}
+            {sourceLinks.length > 0 && <section aria-labelledby="research"><p className="detail-number">04</p><h2 id="research" className="mt-2 font-serif text-3xl">Research & current information</h2><p className="mt-3 text-sm leading-6 text-[#63736f]">Use these sources to confirm details close to your visit.</p><ul className="mt-4 space-y-2">{sourceLinks.map((url) => <li key={url}><a href={url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 font-bold text-[#173d36] underline decoration-[#b76243]/45 underline-offset-4">{getSourceLabel(url)} <Icon name="arrow" size={15} /></a></li>)}</ul></section>}
           </div>
           <aside className="h-fit border-y border-[#173d36]/15 py-6 lg:sticky lg:top-6"><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b76243]">At a glance</p><dl className="mt-5 space-y-5"><InfoRow icon="clock" label={isPlace ? 'Time to allow' : 'Best for'} value={isPlace ? details.duration : (item.goodFor?.join(', ') ?? 'A relaxed stop')} /><InfoRow icon="pin" label="Area" value={item.area ?? 'Crete'} />{!isPlace && <InfoRow icon="euro" label="Price guide" value={item.price ?? 'Check current menu'} />}</dl><DirectionsLink item={item} className="mt-6 w-full bg-[#173d36] px-5 text-[#fffdf8] no-underline" /></aside>
         </div>

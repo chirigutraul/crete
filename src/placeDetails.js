@@ -13,14 +13,14 @@ function formatRatingDate(value) {
   return `Rating checked ${new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)))}`
 }
 
-export function buildPlaceDetails(item = {}, kind = 'place') {
+export function buildPlaceDetails(item = {}, kind = 'place', researched = {}) {
   const descriptor = [item.type, item.cuisine].filter(Boolean).join(' · ')
   const practicalBase = practicalNotes.find(({ pattern }) => pattern.test(descriptor))?.note
     ?? 'Confirm current opening or access conditions before setting out, and allow a little flexibility for island roads and seasonal schedules.'
   const practical = item.bookingRecommended
     ? `${practicalBase} A reservation is recommended.`
     : practicalBase
-  const whyVisit = item.highlight
+  const fallbackWhyVisit = item.highlight
     ? `${item.highlight} is the headline, but the pleasure is in experiencing it at an unhurried Cretan pace.`
     : kind === 'restaurant'
       ? `A useful stop for ${item.cuisine?.toLowerCase() ?? 'local food and drink'} while exploring Crete.`
@@ -30,8 +30,11 @@ export function buildPlaceDetails(item = {}, kind = 'place') {
     : ''
 
   return {
-    whyVisit,
+    whyVisit: researched.whyVisit ?? fallbackWhyVisit,
     practical,
+    bestTime: researched.bestTime ?? 'Check current conditions and plan around the coolest, least busy part of the day.',
+    access: researched.access ?? 'Confirm the current route, parking or transport options before setting out.',
+    tips: Array.isArray(researched.tips) ? researched.tips : [],
     duration: item.suggestedDuration ?? 'Allow time to explore at your own pace',
     ratingLabel,
     ratingCheckedAt: formatRatingDate(item.ratingCheckedAt),
