@@ -13,7 +13,16 @@ body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 .font-serif { font-family: Georgia, "Times New Roman", serif; }
-.app-shell, .standalone-itinerary { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+.app-shell, .standalone-itinerary, .detail-shell { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+
+.detail-art { min-height: 15rem; position: relative; overflow: hidden; }
+.detail-art.place-art::after { inset: auto -12% -40% 35%; height: 110%; }
+.detail-art.food-art::after { width: 150px; height: 150px; }
+.detail-number { color: #b76243; font-size: .7rem; font-weight: 800; letter-spacing: .2em; }
+
+@media (min-width: 640px) {
+  .detail-art { min-height: 24rem; }
+}
 
 .place-art, .food-art { isolation: isolate; position: relative; background-color: #d7c5a5; }
 .place-art::before, .food-art::before { content: ""; position: absolute; inset: 0; background: inherit; }
