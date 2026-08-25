@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import places from './data/places.json'
 import venues from './data/restaurants.json'
 import itinerary from './data/itinerary.json'
-import { downloadItineraryHtml } from './exportItinerary.js'
 
 const iconPaths = {
   compass: <><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.1 4.9-4.9 2.1 2.1-4.9 4.9-2.1Z"/></>,
@@ -15,7 +14,6 @@ const iconPaths = {
   sun: <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></>,
   info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></>,
   phone: <><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 5h4M11 18h2"/></>,
-  download: <><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14a2 2 0 0 0 2-2v-2M3 17v2a2 2 0 0 0 2 2"/></>,
 }
 
 function Icon({ name, size = 18, className = '' }) {
@@ -28,8 +26,19 @@ const tabs = [
   { id: 'itinerary', label: 'Itinerary', shortLabel: 'Itinerary', icon: 'calendar' },
 ]
 
-function App() {
+function App({ route = 'guide' }) {
   const [activeTab, setActiveTab] = useState('places')
+
+  if (route === 'itinerary') {
+    return (
+      <div className="standalone-itinerary min-h-screen bg-[#f6f4ee] text-[#173d36]">
+        <title>Crete itinerary</title>
+        <main id="main-content" className="mx-auto min-h-screen w-full max-w-[430px]">
+          <Itinerary standalone days={itinerary} places={places} venues={venues} />
+        </main>
+      </div>
+    )
+  }
 
   function handleTabKeyDown(event) {
     const index = tabs.findIndex((tab) => tab.id === activeTab)
@@ -92,38 +101,35 @@ function Food({ items }) {
   return <><SectionHeading eyebrow="Eat like a local" title="Restaurants & bars" description="Tavernas worth the drive, slow lunches, and drinks by the water." count={items.length} /><div className="space-y-4">{items.map((item, index) => <article key={item.id ?? index} className="grid overflow-hidden rounded-3xl border border-[#173d36]/10 bg-[#fffdf8] shadow-[0_8px_30px_rgba(29,61,52,0.04)] sm:grid-cols-[180px_1fr] lg:grid-cols-[220px_1fr_auto]"><div className={`min-h-40 food-art food-art-${index % 5}`} aria-hidden="true" /><div className="p-6 lg:p-7"><div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#b76243]"><span>{item.type ?? 'Restaurant'}</span><span aria-hidden="true">·</span><span>{item.cuisine ?? 'Cretan'}</span></div><h3 className="mt-2 font-serif text-2xl sm:text-3xl">{item.name ?? 'Untitled venue'}</h3><p className="mt-3 max-w-2xl text-sm leading-6 text-[#63736f]">{item.description ?? 'Details coming soon.'}</p>{Array.isArray(item.goodFor) && <div className="mt-4 flex flex-wrap gap-2">{item.goodFor.map((tag) => <span key={tag} className="rounded-full bg-[#f0ece4] px-3 py-1 text-xs font-semibold text-[#526963]">{tag}</span>)}</div>}</div><div className="flex items-center justify-between border-t border-[#173d36]/10 px-6 py-5 sm:col-span-2 lg:col-span-1 lg:min-w-48 lg:flex-col lg:items-end lg:justify-center lg:border-l lg:border-t-0 lg:px-7"><div className="space-y-2 text-sm font-semibold text-[#526963]"><p className="flex items-center gap-2 lg:justify-end"><Icon name="pin" size={16} />{item.area ?? 'Crete'}</p><p className="flex items-center gap-2 lg:justify-end"><Icon name="euro" size={16} />{item.price ?? '€€'}</p></div>{item.bookingRecommended && <span className="rounded-full bg-[#e8dbc5] px-3 py-1.5 text-xs font-bold text-[#8a522f] lg:mt-4">Book ahead</span>}</div></article>)}</div></>
 }
 
-function Itinerary({ days, places, venues }) {
+function Itinerary({ days, places, venues, standalone = false }) {
   const [selectedDay, setSelectedDay] = useState(0)
   const [mobilePreview, setMobilePreview] = useState(false)
+  const compact = standalone || mobilePreview
   const safeDays = Array.isArray(days) ? days : []
   const activeDay = safeDays[selectedDay] ?? safeDays[0]
   const catalog = useMemo(() => new Map([...places, ...venues].filter((entry) => entry?.id).map((entry) => [entry.id, entry])), [places, venues])
   const totalStops = safeDays.reduce((sum, day) => sum + (Array.isArray(day.activities) ? day.activities.length : 0), 0)
   const tripName = itinerary.tripName ?? 'Crete itinerary'
-  const handleExport = () => downloadItineraryHtml({ days: safeDays, places, venues, tripName })
   if (!activeDay) return <EmptyState icon="calendar" title="Your days are wide open" message="Add day plans to the itinerary JSON to see them here." />
   const activities = Array.isArray(activeDay.activities) ? activeDay.activities : []
   return <>
-    <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#173d36]/10 bg-[#fffdf8]/70 p-3 sm:mb-10 sm:p-4">
+    {!standalone && <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#173d36]/10 bg-[#fffdf8]/70 p-3 sm:mb-10 sm:p-4">
       <div className="min-w-0 pl-1">
         <p className="text-sm font-bold text-[#173d36]">Preview layout</p>
-        <p className="text-xs leading-5 text-[#63736f]">Preview or download the mobile itinerary</p>
+        <p className="text-xs leading-5 text-[#63736f]">Preview the mobile itinerary</p>
       </div>
       <div className="grid w-full gap-2 sm:w-auto">
         <button type="button" aria-pressed={mobilePreview} onClick={() => setMobilePreview((enabled) => !enabled)} className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] ${mobilePreview ? 'border-[#173d36] bg-[#173d36] text-white shadow-sm' : 'border-[#173d36]/15 bg-white text-[#47635d] hover:border-[#173d36]/35 hover:text-[#173d36]'}`}>
           <Icon name="phone" size={17} /> Mobile preview
           <span aria-hidden="true" className={`relative h-5 w-9 rounded-full transition ${mobilePreview ? 'bg-[#e6b66a]' : 'bg-[#d8d5cc]'}`}><span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition ${mobilePreview ? 'left-[18px]' : 'left-0.5'}`} /></span>
         </button>
-        <button type="button" onClick={handleExport} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#b76243]/30 bg-[#f6e6d6] px-4 py-2 text-sm font-semibold text-[#8a442f] transition hover:border-[#b76243]/55 hover:bg-[#f2dcc7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243]">
-          <Icon name="download" size={17} /> Export mobile HTML
-        </button>
       </div>
-    </div>
-    <div className={mobilePreview ? 'mx-auto w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-[#173d36]/15 bg-[#f6f4ee] shadow-[0_24px_70px_rgba(23,61,54,0.14)]' : ''}>
-      <div className={mobilePreview ? 'px-5 py-7' : ''}>
-        <SectionHeading compact={mobilePreview} eyebrow="Your saved plan" title={tripName} description={`${safeDays.length} days · ${totalStops} planned stops · curated picks linked from the guide`} />
-        <div className={`mb-8 overflow-x-auto pb-2 ${mobilePreview ? '-mx-5 px-5' : '-mx-5 px-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0'}`} aria-label="Choose itinerary day"><div className="flex min-w-max gap-2">{safeDays.map((day, index) => <button key={day.id ?? index} type="button" onClick={() => setSelectedDay(index)} aria-pressed={selectedDay === index} className={`rounded-2xl border px-5 py-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] ${selectedDay === index ? 'border-[#173d36] bg-[#173d36] text-white shadow-md' : 'border-[#173d36]/10 bg-[#fffdf8] text-[#526963] hover:border-[#173d36]/30'}`}><span className="block text-[11px] font-bold uppercase tracking-widest opacity-70">Day {index + 1}</span><span className="mt-0.5 block font-serif text-lg">{day.shortDate ?? day.date ?? `Day ${index + 1}`}</span></button>)}</div></div>
-        <div className={`grid gap-8 ${mobilePreview ? '' : 'lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12'}`}><div><div className="mb-7"><p className="text-sm font-semibold text-[#b76243]">Day {selectedDay + 1} · {activeDay.date ?? 'Date TBD'}</p><h3 className={`mt-1 font-serif text-3xl ${mobilePreview ? '' : 'sm:text-4xl'}`}>{activeDay.title ?? 'Open day'}</h3><p className="mt-2 text-[#63736f]">{activeDay.summary ?? 'A flexible day to make your own.'}</p></div>{activities.length ? <ol className="relative ml-2 border-l border-[#173d36]/15">{activities.map((activity, index) => <TimelineItem compact={mobilePreview} key={activity.id ?? index} activity={activity} item={catalog.get(activity.placeId ?? activity.venueId)} last={index === activities.length - 1} />)}</ol> : <EmptyState icon="clock" title="Nothing timed yet" message="This day is free for spontaneous plans." />}</div><aside className={`h-fit rounded-3xl bg-[#e9e1d3] p-6 ${mobilePreview ? '' : 'lg:sticky lg:top-24'}`}><p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8a522f]">Day notes</p><dl className="space-y-4 text-sm"><InfoRow icon="map" label="Base" value={activeDay.base ?? 'Flexible'} /><InfoRow icon="clock" label="Driving" value={activeDay.driving ?? 'Not set'} /><InfoRow icon="sun" label="Pace" value={activeDay.pace ?? 'Easy'} /></dl>{activeDay.tip && <div className="mt-6 border-t border-[#173d36]/10 pt-5"><p className="flex gap-2 text-sm leading-6 text-[#47635d]"><Icon name="info" size={18} className="mt-0.5 shrink-0 text-[#b76243]" />{activeDay.tip}</p></div>}</aside></div>
+    </div>}
+    <div className={standalone ? 'min-h-screen w-full bg-[#f6f4ee]' : mobilePreview ? 'mx-auto w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-[#173d36]/15 bg-[#f6f4ee] shadow-[0_24px_70px_rgba(23,61,54,0.14)]' : ''}>
+      <div className={compact ? 'px-5 py-7' : ''}>
+        <SectionHeading compact={compact} eyebrow="Your saved plan" title={tripName} description={`${safeDays.length} days · ${totalStops} planned stops · curated picks linked from the guide`} />
+        <div className={`mb-8 overflow-x-auto pb-2 ${compact ? '-mx-5 px-5' : '-mx-5 px-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0'}`} aria-label="Choose itinerary day"><div className="flex min-w-max gap-2">{safeDays.map((day, index) => <button key={day.id ?? index} type="button" onClick={() => setSelectedDay(index)} aria-pressed={selectedDay === index} className={`rounded-2xl border px-5 py-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] ${selectedDay === index ? 'border-[#173d36] bg-[#173d36] text-white shadow-md' : 'border-[#173d36]/10 bg-[#fffdf8] text-[#526963] hover:border-[#173d36]/30'}`}><span className="block text-[11px] font-bold uppercase tracking-widest opacity-70">Day {index + 1}</span><span className="mt-0.5 block font-serif text-lg">{day.shortDate ?? day.date ?? `Day ${index + 1}`}</span></button>)}</div></div>
+        <div className={`grid gap-8 ${compact ? '' : 'lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12'}`}><div><div className="mb-7"><p className="text-sm font-semibold text-[#b76243]">Day {selectedDay + 1} · {activeDay.date ?? 'Date TBD'}</p><h3 className={`mt-1 font-serif text-3xl ${compact ? '' : 'sm:text-4xl'}`}>{activeDay.title ?? 'Open day'}</h3><p className="mt-2 text-[#63736f]">{activeDay.summary ?? 'A flexible day to make your own.'}</p></div>{activities.length ? <ol className="relative ml-2 border-l border-[#173d36]/15">{activities.map((activity, index) => <TimelineItem compact={compact} key={activity.id ?? index} activity={activity} item={catalog.get(activity.placeId ?? activity.venueId)} last={index === activities.length - 1} />)}</ol> : <EmptyState icon="clock" title="Nothing timed yet" message="This day is free for spontaneous plans." />}</div><aside className={`h-fit rounded-3xl bg-[#e9e1d3] p-6 ${compact ? '' : 'lg:sticky lg:top-24'}`}><p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8a522f]">Day notes</p><dl className="space-y-4 text-sm"><InfoRow icon="map" label="Base" value={activeDay.base ?? 'Flexible'} /><InfoRow icon="clock" label="Driving" value={activeDay.driving ?? 'Not set'} /><InfoRow icon="sun" label="Pace" value={activeDay.pace ?? 'Easy'} /></dl>{activeDay.tip && <div className="mt-6 border-t border-[#173d36]/10 pt-5"><p className="flex gap-2 text-sm leading-6 text-[#47635d]"><Icon name="info" size={18} className="mt-0.5 shrink-0 text-[#b76243]" />{activeDay.tip}</p></div>}</aside></div>
       </div>
     </div>
   </>

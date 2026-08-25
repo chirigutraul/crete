@@ -13,6 +13,7 @@ body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 .font-serif { font-family: Georgia, "Times New Roman", serif; }
+.standalone-itinerary { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
 
 .place-art, .food-art { isolation: isolate; position: relative; background-color: #d7c5a5; }
 .place-art::before, .food-art::before { content: ""; position: absolute; inset: 0; background: inherit; }

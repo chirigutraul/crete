@@ -1,0 +1,10 @@
+{
+  "name": "Crete itinerary",
+  "short_name": "Crete",
+  "description": "A day-by-day Crete itinerary.",
+  "start_url": "/itinerary/",
+  "scope": "/itinerary/",
+  "display": "standalone",
+  "background_color": "#f6f4ee",
+  "theme_color": "#f6f4ee"
+}
