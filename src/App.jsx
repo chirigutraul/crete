@@ -13,7 +13,6 @@ const iconPaths = {
   euro: <><circle cx="12" cy="12" r="9"/><path d="M16 8.5a4.5 4.5 0 1 0 0 7M7 10.5h7M7 13.5h6"/></>,
   sun: <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></>,
   info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></>,
-  phone: <><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 5h4M11 18h2"/></>,
 }
 
 function Icon({ name, size = 18, className = '' }) {
@@ -54,7 +53,7 @@ function App({ route = 'guide' }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f4ee] text-[#173d36]">
+    <div className="app-shell min-h-screen bg-[#f6f4ee] text-[#173d36]">
       <header className="relative overflow-hidden border-b border-[#173d36]/10 bg-[#f2eee5]">
         <div className="absolute -right-24 -top-40 h-96 w-96 rounded-full bg-[#e6b66a]/20 blur-3xl" />
         <div className="relative mx-auto max-w-7xl px-5 pb-7 pt-7 sm:px-8 lg:px-12 lg:pb-10 lg:pt-10">
@@ -70,7 +69,7 @@ function App({ route = 'guide' }) {
 
       <div className="sticky top-0 z-20 border-b border-[#173d36]/10 bg-[#f6f4ee]/95 backdrop-blur-lg">
         <nav aria-label="Trip sections" className="mx-auto max-w-7xl px-3 sm:px-8 lg:px-12"><div role="tablist" aria-label="Trip content" className="grid grid-cols-3 gap-1 py-2 sm:flex sm:gap-3">
-          {tabs.map((tab) => <button key={tab.id} id={`tab-${tab.id}`} role="tab" type="button" aria-selected={activeTab === tab.id} aria-controls={`panel-${tab.id}`} tabIndex={activeTab === tab.id ? 0 : -1} onClick={() => setActiveTab(tab.id)} onKeyDown={handleTabKeyDown} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 py-3 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] sm:px-5 ${activeTab === tab.id ? 'bg-[#173d36] text-white shadow-sm' : 'text-[#5d716d] hover:bg-white/70 hover:text-[#173d36]'}`}><Icon name={tab.icon} size={17} /><span className="sm:hidden">{tab.shortLabel}</span><span className="hidden sm:inline">{tab.label}</span></button>)}
+          {tabs.map((tab) => <button key={tab.id} id={`tab-${tab.id}`} role="tab" type="button" aria-selected={activeTab === tab.id} aria-controls={`panel-${tab.id}`} tabIndex={activeTab === tab.id ? 0 : -1} onClick={() => setActiveTab(tab.id)} onKeyDown={handleTabKeyDown} className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] sm:flex-row sm:gap-2 sm:px-5 sm:py-3 sm:text-sm ${activeTab === tab.id ? 'bg-[#173d36] text-white shadow-sm' : 'text-[#5d716d] hover:bg-white/70 hover:text-[#173d36]'}`}><Icon name={tab.icon} size={17} /><span className="sm:hidden">{tab.shortLabel}</span><span className="hidden sm:inline">{tab.label}</span></button>)}
         </div></nav>
       </div>
 
@@ -103,8 +102,6 @@ function Food({ items }) {
 
 function Itinerary({ days, places, venues, standalone = false }) {
   const [selectedDay, setSelectedDay] = useState(0)
-  const [mobilePreview, setMobilePreview] = useState(false)
-  const compact = standalone || mobilePreview
   const safeDays = Array.isArray(days) ? days : []
   const activeDay = safeDays[selectedDay] ?? safeDays[0]
   const catalog = useMemo(() => new Map([...places, ...venues].filter((entry) => entry?.id).map((entry) => [entry.id, entry])), [places, venues])
@@ -112,32 +109,16 @@ function Itinerary({ days, places, venues, standalone = false }) {
   const tripName = itinerary.tripName ?? 'Crete itinerary'
   if (!activeDay) return <EmptyState icon="calendar" title="Your days are wide open" message="Add day plans to the itinerary JSON to see them here." />
   const activities = Array.isArray(activeDay.activities) ? activeDay.activities : []
-  return <>
-    {!standalone && <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#173d36]/10 bg-[#fffdf8]/70 p-3 sm:mb-10 sm:p-4">
-      <div className="min-w-0 pl-1">
-        <p className="text-sm font-bold text-[#173d36]">Preview layout</p>
-        <p className="text-xs leading-5 text-[#63736f]">Preview the mobile itinerary</p>
-      </div>
-      <div className="grid w-full gap-2 sm:w-auto">
-        <button type="button" aria-pressed={mobilePreview} onClick={() => setMobilePreview((enabled) => !enabled)} className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] ${mobilePreview ? 'border-[#173d36] bg-[#173d36] text-white shadow-sm' : 'border-[#173d36]/15 bg-white text-[#47635d] hover:border-[#173d36]/35 hover:text-[#173d36]'}`}>
-          <Icon name="phone" size={17} /> Mobile preview
-          <span aria-hidden="true" className={`relative h-5 w-9 rounded-full transition ${mobilePreview ? 'bg-[#e6b66a]' : 'bg-[#d8d5cc]'}`}><span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition ${mobilePreview ? 'left-[18px]' : 'left-0.5'}`} /></span>
-        </button>
-      </div>
-    </div>}
-    <div className={standalone ? 'min-h-screen w-full bg-[#f6f4ee]' : mobilePreview ? 'mx-auto w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-[#173d36]/15 bg-[#f6f4ee] shadow-[0_24px_70px_rgba(23,61,54,0.14)]' : ''}>
-      <div className={compact ? 'px-5 py-7' : ''}>
-        <SectionHeading compact={compact} eyebrow="Your saved plan" title={tripName} description={`${safeDays.length} days · ${totalStops} planned stops · curated picks linked from the guide`} />
-        <div className={`mb-8 overflow-x-auto pb-2 ${compact ? '-mx-5 px-5' : '-mx-5 px-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0'}`} aria-label="Choose itinerary day"><div className="flex min-w-max gap-2">{safeDays.map((day, index) => <button key={day.id ?? index} type="button" onClick={() => setSelectedDay(index)} aria-pressed={selectedDay === index} className={`rounded-2xl border px-5 py-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] ${selectedDay === index ? 'border-[#173d36] bg-[#173d36] text-white shadow-md' : 'border-[#173d36]/10 bg-[#fffdf8] text-[#526963] hover:border-[#173d36]/30'}`}><span className="block text-[11px] font-bold uppercase tracking-widest opacity-70">Day {index + 1}</span><span className="mt-0.5 block font-serif text-lg">{day.shortDate ?? day.date ?? `Day ${index + 1}`}</span></button>)}</div></div>
-        <div className={`grid gap-8 ${compact ? '' : 'lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12'}`}><div><div className="mb-7"><p className="text-sm font-semibold text-[#b76243]">Day {selectedDay + 1} · {activeDay.date ?? 'Date TBD'}</p><h3 className={`mt-1 font-serif text-3xl ${compact ? '' : 'sm:text-4xl'}`}>{activeDay.title ?? 'Open day'}</h3><p className="mt-2 text-[#63736f]">{activeDay.summary ?? 'A flexible day to make your own.'}</p></div>{activities.length ? <ol className="relative ml-2 border-l border-[#173d36]/15">{activities.map((activity, index) => <TimelineItem compact={compact} key={activity.id ?? index} activity={activity} item={catalog.get(activity.placeId ?? activity.venueId)} last={index === activities.length - 1} />)}</ol> : <EmptyState icon="clock" title="Nothing timed yet" message="This day is free for spontaneous plans." />}</div><aside className={`h-fit rounded-3xl bg-[#e9e1d3] p-6 ${compact ? '' : 'lg:sticky lg:top-24'}`}><p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8a522f]">Day notes</p><dl className="space-y-4 text-sm"><InfoRow icon="map" label="Base" value={activeDay.base ?? 'Flexible'} /><InfoRow icon="clock" label="Driving" value={activeDay.driving ?? 'Not set'} /><InfoRow icon="sun" label="Pace" value={activeDay.pace ?? 'Easy'} /></dl>{activeDay.tip && <div className="mt-6 border-t border-[#173d36]/10 pt-5"><p className="flex gap-2 text-sm leading-6 text-[#47635d]"><Icon name="info" size={18} className="mt-0.5 shrink-0 text-[#b76243]" />{activeDay.tip}</p></div>}</aside></div>
-      </div>
-    </div>
-  </>
+  return <div className={standalone ? 'min-h-screen w-full bg-[#f6f4ee] px-5 py-7' : 'mx-auto w-full max-w-3xl'}>
+    <SectionHeading compact eyebrow="Your saved plan" title={tripName} description={`${safeDays.length} days · ${totalStops} planned stops · curated picks linked from the guide`} />
+    <div className={`mb-8 snap-x snap-mandatory overflow-x-auto pb-2 ${standalone ? '-mx-5 px-5' : '-mx-5 px-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0'}`} aria-label="Choose itinerary day"><div className="flex min-w-max gap-2">{safeDays.map((day, index) => <button key={day.id ?? index} type="button" onClick={() => setSelectedDay(index)} aria-pressed={selectedDay === index} className={`min-h-12 snap-start rounded-2xl border px-5 py-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b76243] ${selectedDay === index ? 'border-[#173d36] bg-[#173d36] text-white shadow-md' : 'border-[#173d36]/10 bg-[#fffdf8] text-[#526963] hover:border-[#173d36]/30'}`}><span className="block text-[11px] font-bold uppercase tracking-widest opacity-70">Day {index + 1}</span><span className="mt-0.5 block font-serif text-lg">{day.shortDate ?? day.date ?? `Day ${index + 1}`}</span></button>)}</div></div>
+    <div className="grid gap-8"><div><div className="mb-7"><p className="text-sm font-semibold text-[#b76243]">Day {selectedDay + 1} · {activeDay.date ?? 'Date TBD'}</p><h3 className="mt-1 font-serif text-3xl">{activeDay.title ?? 'Open day'}</h3><p className="mt-2 text-[#63736f]">{activeDay.summary ?? 'A flexible day to make your own.'}</p></div>{activities.length ? <ol className="relative ml-2 border-l border-[#173d36]/15">{activities.map((activity, index) => <TimelineItem key={activity.id ?? index} activity={activity} item={catalog.get(activity.placeId ?? activity.venueId)} last={index === activities.length - 1} />)}</ol> : <EmptyState icon="clock" title="Nothing timed yet" message="This day is free for spontaneous plans." />}</div><aside className="h-fit rounded-3xl bg-[#e9e1d3] p-6"><p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8a522f]">Day notes</p><dl className="space-y-4 text-sm"><InfoRow icon="map" label="Base" value={activeDay.base ?? 'Flexible'} /><InfoRow icon="clock" label="Driving" value={activeDay.driving ?? 'Not set'} /><InfoRow icon="sun" label="Pace" value={activeDay.pace ?? 'Easy'} /></dl>{activeDay.tip && <div className="mt-6 border-t border-[#173d36]/10 pt-5"><p className="flex gap-2 text-sm leading-6 text-[#47635d]"><Icon name="info" size={18} className="mt-0.5 shrink-0 text-[#b76243]" />{activeDay.tip}</p></div>}</aside></div>
+  </div>
 }
 
-function TimelineItem({ activity, item, last, compact = false }) {
+function TimelineItem({ activity, item, last }) {
   const hasBrokenReference = (activity.placeId || activity.venueId) && !item
-  return <li className={`relative pl-7 ${compact ? '' : 'sm:grid sm:grid-cols-[90px_1fr] sm:gap-5 sm:pl-9'} ${last ? 'pb-1' : compact ? 'pb-8' : 'pb-8 sm:pb-10'}`}><span className="absolute -left-[6px] top-1.5 h-3 w-3 rounded-full border-2 border-[#f6f4ee] bg-[#b76243] ring-1 ring-[#b76243]" /><time className={`mb-2 block text-sm font-bold text-[#b76243] ${compact ? '' : 'sm:mb-0 sm:pt-1'}`}>{activity.time ?? 'Anytime'}</time><div className={`rounded-2xl border border-[#173d36]/10 bg-[#fffdf8] p-5 shadow-[0_6px_20px_rgba(29,61,52,0.04)] ${compact ? '' : 'sm:p-6'}`}><div className="flex items-start justify-between gap-4"><div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wider text-[#788783]">{activity.type ?? item?.type ?? 'Activity'}</p><h4 className="mt-1 break-words font-serif text-2xl">{item?.name ?? activity.title ?? (hasBrokenReference ? 'Unavailable catalog item' : 'Untitled stop')}</h4></div>{activity.duration && <span className="shrink-0 rounded-full bg-[#f0ece4] px-3 py-1 text-xs font-semibold text-[#526963]">{activity.duration}</span>}</div><p className="mt-3 text-sm leading-6 text-[#63736f]">{activity.note ?? item?.description ?? (hasBrokenReference ? 'This itinerary reference no longer matches a catalog entry.' : 'Details coming soon.')}</p>{(item?.area || activity.location) && <p className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#526963]"><Icon name="pin" size={15} />{item?.area ?? activity.location}</p>}</div></li>
+  return <li className={`relative pl-7 ${last ? 'pb-1' : 'pb-8'}`}><span className="absolute -left-[6px] top-1.5 h-3 w-3 rounded-full border-2 border-[#f6f4ee] bg-[#b76243] ring-1 ring-[#b76243]" /><time className="mb-2 block text-sm font-bold text-[#b76243]">{activity.time ?? 'Anytime'}</time><div className="rounded-2xl border border-[#173d36]/10 bg-[#fffdf8] p-5 shadow-[0_6px_20px_rgba(29,61,52,0.04)] sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wider text-[#788783]">{activity.type ?? item?.type ?? 'Activity'}</p><h4 className="mt-1 break-words font-serif text-2xl">{item?.name ?? activity.title ?? (hasBrokenReference ? 'Unavailable catalog item' : 'Untitled stop')}</h4></div>{activity.duration && <span className="shrink-0 rounded-full bg-[#f0ece4] px-3 py-1 text-xs font-semibold text-[#526963]">{activity.duration}</span>}</div><p className="mt-3 text-sm leading-6 text-[#63736f]">{activity.note ?? item?.description ?? (hasBrokenReference ? 'This itinerary reference no longer matches a catalog entry.' : 'Details coming soon.')}</p>{(item?.area || activity.location) && <p className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#526963]"><Icon name="pin" size={15} />{item?.area ?? activity.location}</p>}</div></li>
 }
 
 function InfoRow({ icon, label, value }) { return <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#fffdf8]/70"><Icon name={icon} size={17} /></span><div><dt className="text-xs text-[#788783]">{label}</dt><dd className="font-semibold">{value}</dd></div></div> }
