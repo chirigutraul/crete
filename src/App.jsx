@@ -70,7 +70,7 @@ function App({ route = { name: 'guide' } }) {
 
   return (
     <div className="app-shell min-h-screen bg-[#f6f4ee] text-[#173d36]">
-      <header className="relative overflow-hidden border-b border-[#173d36]/10 bg-[#f2eee5]">
+      {activeTab !== 'itinerary' && <header className="relative overflow-hidden border-b border-[#173d36]/10 bg-[#f2eee5]">
         <div className="absolute -right-24 -top-40 h-96 w-96 rounded-full bg-[#e6b66a]/20 blur-3xl" />
         <div className="relative mx-auto max-w-7xl px-5 pb-7 pt-7 sm:px-8 lg:px-12 lg:pb-10 lg:pt-10">
           <div className="mb-10 flex items-center justify-between lg:mb-16">
@@ -81,7 +81,7 @@ function App({ route = { name: 'guide' } }) {
           <h1 className="max-w-3xl font-serif text-5xl leading-[0.95] tracking-[-0.04em] text-[#173d36] sm:text-6xl lg:text-7xl">Your considered guide to Crete</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-[#47635d] sm:text-lg">Discover island favourites, then see them come together in one calm, readable itinerary.</p>
         </div>
-      </header>
+      </header>}
 
       <div className="sticky top-0 z-20 border-b border-[#173d36]/10 bg-[#f6f4ee]/95 backdrop-blur-lg">
         <nav aria-label="Trip sections" className="mx-auto max-w-7xl px-3 sm:px-8 lg:px-12"><div role="tablist" aria-label="Trip content" className="grid grid-cols-3 gap-1 py-2 sm:flex sm:gap-3">
